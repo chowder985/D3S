@@ -7,13 +7,17 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-
+import org.hyunjun.school.School;
+import org.hyunjun.school.SchoolException;
+import org.hyunjun.school.SchoolMenu;
+import org.hyunjun.school.SchoolSchedule;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -23,12 +27,15 @@ public class MainActivity extends AppCompatActivity {
     private String htmlPageUrl = "http://www.sunrint.hs.kr/18602/subMenu.do";
     private TextView textviewHtmlDocument;
     private String htmlContentInStringFormat;
+    private String pureText;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        final DBHelper dbHelper = new DBHelper(getApplicationContext(), "MoneyBook.db", null, 1);
 
 
         textviewHtmlDocument = (TextView)findViewById(R.id.textView);
@@ -55,11 +62,16 @@ public class MainActivity extends AppCompatActivity {
         protected Void doInBackground(Void... params) {
             try {
                 Document doc = Jsoup.connect(htmlPageUrl).get();
-                Elements links = doc.select("#contents_195696");
+                Elements links = doc.select("tr[align] > td");
 
-//                for (Element link : links) {
-                htmlContentInStringFormat += links.html().trim() + "\n";
-//                }
+                for (Element link : links) {
+                    if(link.text().trim().equals("이름")==false){
+                        if(link.text().trim().equals("직책")==false){
+
+                        }
+                    }
+                    htmlContentInStringFormat += link.html().trim() + "\n";
+                }
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -69,9 +81,9 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Void result) {
-            Log.d("asdf", htmlContentInStringFormat);
+            //Log.d("asdf", htmlContentInStringFormat);
 
-            String pureText = getText(htmlContentInStringFormat);
+            pureText = getText(htmlContentInStringFormat);
             textviewHtmlDocument.setText(pureText);
         }
 
@@ -82,6 +94,7 @@ public class MainActivity extends AppCompatActivity {
             Pattern nTAGS = Pattern.compile("<\\w+\\s+[^<]*\\s*>");
             Pattern ENTITY_REFS = Pattern.compile("&[^;]+;");
             Pattern WHITESPACE = Pattern.compile("\\s\\s+");
+            //Pattern
 
             Matcher m;
 
@@ -99,6 +112,10 @@ public class MainActivity extends AppCompatActivity {
             content = m.replaceAll(" ");
 
             return content;
+        }
+
+        public String getString(){
+            return pureText;
         }
     }
 
